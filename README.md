@@ -14,7 +14,7 @@
 
 ## 目录结构
 ```
-Client
+BLive_Coyote
 ├─public
 │  └─css
 └─src
