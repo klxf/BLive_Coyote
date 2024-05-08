@@ -447,6 +447,10 @@ select {
 .game-tips {
     font-size: 20px;
     font-weight: bold;
+    color: #ffe99d;
+    top: 16px;
+    right: 25px;
+    position: fixed;
 }
 
 .tips-hide {

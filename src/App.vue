@@ -187,6 +187,9 @@ const hideqrcode = () => {
       <div class="close-qrcode" @click="hideqrcode">关闭</div>
     </div>
   </div>
+  <div class="game-tips">
+    ! 请在连接前确保已经设置好强度上限
+  </div>
   <div>
     <h2>游戏设置</h2>
     <div class="form">
