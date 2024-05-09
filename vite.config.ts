@@ -15,8 +15,6 @@ export default defineConfig({
     },
     plugins: [
         vue(),
-        viteCommonjs({
-            include: ['danmaku-websocket.min.js']
-        }
-    )]
+        viteCommonjs()
+    ]
 })
