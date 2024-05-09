@@ -1,9 +1,9 @@
 import {ref} from "vue";
 import { Notyf } from 'notyf'
 import { waveData } from "../assets/dataMap";
+import QRCode from 'qrcode'
 
 const notyf = new Notyf({ duration: 4000 })
-const QRCode = require('qrcode')
 
 let channelAStrength = 0; // A通道强度
 let channelBStrength = 0; // B通道强度
