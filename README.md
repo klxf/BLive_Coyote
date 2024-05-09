@@ -12,6 +12,12 @@
 - 郊狼 WebSocket 后端请参考：[DG-LAB-OPENSOURCE](https://github.com/DG-LAB-OPENSOURCE/DG-LAB-OPENSOURCE/tree/main/socket/BackEnd(Node))
 - 哔哩哔哩直播互动玩法服务端请参考：[JavaScript Demo](https://open-live.bilibili.com/document/a7bd5377-ad7d-a273-25ae-28caf37a7a85)
 
+## Demo
+> [!TIP]
+> 使用Demo需要在本地启动 Node 服务端，请参考 [哔哩哔哩开放平台文档](https://open-live.bilibili.com/document/a7bd5377-ad7d-a273-25ae-28caf37a7a85)。
+
+- [BLive Coyote Demo](https://blive-coyote.babyfang.cn/)
+
 ## 目录结构
 ```
 BLive_Coyote
