@@ -1,7 +1,7 @@
 {
-  "name": "poros-demo-client",
+  "name": "blive-coyote-demo-client",
   "private": true,
-  "version": "0.0.0",
+  "version": "0.0.1",
   "scripts": {
     "dev": "vite --port 8888 --host 0.0.0.0 ",
     "build": "vue-tsc --noEmit && vite build",

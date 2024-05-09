@@ -13,5 +13,10 @@ export default defineConfig({
             "@": path.resolve(__dirname, "./src")
         }
     },
-    plugins: [vue(), viteCommonjs()]
+    plugins: [
+        vue(),
+        viteCommonjs({
+            include: ['danmaku-websocket.min.js']
+        }
+    )]
 })
