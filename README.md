@@ -16,7 +16,7 @@
 > [!NOTE]
 > 使用Demo需要在本地启动 Node 服务端，请参考 [哔哩哔哩开放平台文档](https://open-live.bilibili.com/document/a7bd5377-ad7d-a273-25ae-28caf37a7a85)。
 > 
-> 本项目**不会**向服务端传递`access_key_id`和`access_key_secret`，请自行修改服务端代码（可参考[服务端本地搭建指南](https://github.com/klxf/BLive_Coyote/issues/1)）。
+> 本项目**不会**向服务端传递`access_key_id`和`access_key_secred`，请自行修改服务端代码（可参考[服务端本地搭建指南](https://github.com/klxf/BLive_Coyote/issues/1)）。
 
 - [BLive Coyote Demo](https://blive-coyote.babyfang.cn/)
 
