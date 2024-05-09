@@ -30,13 +30,13 @@ const feedBackMsg = {
 
 const qrcodeSrc = ref("")
 const qrcodeShow = ref(false)
-QRCode.toDataURL("https://www.dungeon-lab.com/app-download.php#DGLAB-SOCKET#ws://39.108.168.199:9999/", function (err, url) {
+QRCode.toDataURL("https://www.dungeon-lab.com/app-download.php#DGLAB-SOCKET#wss://coyote.babyfang.cn/", function (err, url) {
     //console.log(url)
     qrcodeSrc.value = url
 })
 
 function createCoyoteSocket() {
-    wsConn = new WebSocket('ws://coyote.babyfang.cn:9999/');
+    wsConn = new WebSocket('wss://coyote.babyfang.cn/');
     wsConn.onopen = function (event) {
         console.log("WebSocket连接已建立");
     }
@@ -57,7 +57,7 @@ function createCoyoteSocket() {
                 if (!msg.targetId) {
                     connectionId = msg.clientId;
                     console.log(`收到clientId：${connectionId}`);
-                    QRCode.toDataURL("https://www.dungeon-lab.com/app-download.php#DGLAB-SOCKET#ws://coyote.babyfang.cn:9999/" + connectionId, function (err, url) {
+                    QRCode.toDataURL("https://www.dungeon-lab.com/app-download.php#DGLAB-SOCKET#wss://coyote.babyfang.cn/" + connectionId, function (err, url) {
                         //console.log(url)
                         qrcodeSrc.value = url
                     })
