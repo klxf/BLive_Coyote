@@ -4,7 +4,14 @@
 import { ref } from "vue"
 import axios from "axios"
 import { createSocket, destroySocket } from "./socket/index"
-import { createCoyoteSocket, closeCoyoteSocket, qrcodeSrc, qrcodeShow } from "./socket/coyote"
+import {
+  createCoyoteSocket,
+  closeCoyoteSocket,
+  sendWaveData,
+  qrcodeSrc,
+  qrcodeShow,
+  addOrIncrease
+} from "./socket/coyote"
 import { Notyf } from 'notyf'
 
 const notyf = new Notyf({ duration: 3000 })
@@ -151,12 +158,17 @@ const handleDestroySocket = () => {
  * 测试按钮
  */
 const test = () => {
-  let map = {
-    "123": "AAWWWWW",
-    "123456": "aaaaaaaa",
+  const waveData = {
+    "test": `["0A0A0A0A00000000","0A0A0A0A00000000","0A0A0A0A00000000","0A0A0A0A00000000","0A0A0A0A00000000","0A0A0A0A00000000","0A0A0A0A00000000","0A0A0A0A00000000","0A0A0A0A01010101","0A0A0A0A01010101","0A0A0A0A22222222","0A0A0A0A22222222","0A0A0A0A43434343","0A0A0A0A43434343","0A0A0A0A64646464","0A0A0A0A64646464"]`
   }
-  notyf.success({ message: '测试吐司', duration: 3000, ripple: true })
-  notyf.success({ message: map[123], duration: 3000, ripple: true })
+  try {
+    sendWaveData(5, 5, waveData["test"], waveData["test"])
+    notyf.success("波形发送成功")
+  }
+  catch (e) {
+    console.log(e)
+    notyf.error("操作失败！")
+  }
 }
 
 /**

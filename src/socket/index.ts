@@ -1,6 +1,7 @@
 import DanmakuWebSocket from "../assets/danmaku-websocket.min.js"
 import { Notyf } from 'notyf'
 import { closeCoyoteSocket, addOrIncrease, sendWaveData } from "./coyote"
+import { waveData } from "../assets/dataMap";
 
 let ws: DanmakuWebSocket
 const notyf = new Notyf({ duration: 4000 })
@@ -55,7 +56,7 @@ function createSocket(authBody: string, wssLinks: string[]) {
                 } else {
                     // 其他礼物，发送波形数据
                     try {
-                        sendWaveData(5, 5, res.data.gift_id, res.data.gift_id)
+                        sendWaveData(5, 5, waveData[res.data.gift_id], waveData[res.data.gift_id])
                         notyf.success("收到礼物" + res.data.gift_name)
                     }
                     catch (e) {

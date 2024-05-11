@@ -1,6 +1,5 @@
 import {ref} from "vue";
 import { Notyf } from 'notyf'
-import { waveData } from "../assets/dataMap";
 import QRCode from 'qrcode'
 
 const notyf = new Notyf({ duration: 4000 })
@@ -140,8 +139,11 @@ function sendWaveData(timeA, timeB, waveA, waveB) {
         return
     }
 
-    const msg1 = `A:${waveData[waveA]}`
-    const msg2 = `B:${waveData[waveB]}`
+    /*const msg1 = `A:${waveData[waveA]}`
+    const msg2 = `B:${waveData[waveB]}`*/
+
+    const msg1 = `A:${waveA}`
+    const msg2 = `B:${waveB}`
     const data = {
         type: "clientMsg", message: msg1, message2: msg2, time1: timeA, time2: timeB
     }
