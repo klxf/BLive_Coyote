@@ -16,5 +16,13 @@ export default defineConfig({
     plugins: [
         vue(),
         viteCommonjs()
-    ]
+    ],
+    build: {
+        rollupOptions: {
+            input: {
+                main: path.resolve(__dirname, "index.html"),
+                waveHelper: path.resolve(__dirname, "waveHelper.html")
+            }
+        }
+    }
 })
