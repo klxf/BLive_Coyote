@@ -3,19 +3,25 @@
 // Check out https://v3.vuejs.org/api/sfc-script-setup.html#sfc-script-setup
 import { ref } from "vue"
 import axios from "axios"
+import { Notyf } from 'notyf'
 import { createSocket, destroySocket } from "./socket/index"
 import {
   createCoyoteSocket,
   closeCoyoteSocket,
+  addOrIncrease,
   sendWaveData,
   qrcodeSrc,
   qrcodeShow,
-  addOrIncrease
+  channelAStrength,
+  channelBStrength,
+  softAStrength,
+  softBStrength,
+  followAStrength,
+  followBStrength
 } from "./socket/coyote"
-import { Notyf } from 'notyf'
+
 
 const notyf = new Notyf({ duration: 3000 })
-
 
 // API
 const api = axios.create({
@@ -35,6 +41,8 @@ const wssLinks = ref([])
 const heartBeatTimer = ref<NodeJS.Timer>()
 // be ready
 clearInterval(heartBeatTimer.value!)
+// 测试波形数据
+const waveData = ref("")
 
 /**
  * 测试请求鉴权接口
@@ -158,11 +166,10 @@ const handleDestroySocket = () => {
  * 测试按钮
  */
 const test = () => {
-  const waveData = {
-    "test": `["0A0A0A0A00000000","0A0A0A0A00000000","0A0A0A0A00000000","0A0A0A0A00000000","0A0A0A0A00000000","0A0A0A0A00000000","0A0A0A0A00000000","0A0A0A0A00000000","0A0A0A0A01010101","0A0A0A0A01010101","0A0A0A0A22222222","0A0A0A0A22222222","0A0A0A0A43434343","0A0A0A0A43434343","0A0A0A0A64646464","0A0A0A0A64646464"]`
-  }
   try {
-    sendWaveData(5, 5, waveData["test"], waveData["test"])
+    sendWaveData(5, 5, waveData.value, waveData.value)
+    addOrIncrease(2, 1, 1)
+    console.log(waveData.value)
     notyf.success("波形发送成功")
   }
   catch (e) {
@@ -202,8 +209,26 @@ const hideqrcode = () => {
   <div class="game-tips">
     ! 请在连接前确保已经设置好强度上限
   </div>
-  <div>
+  <div class="game-info">
+    <h2>主机状态</h2>
+    <p>A: {{ channelAStrength }} / {{ softAStrength }}</p>
+    <p>B: {{ channelBStrength }} / {{ softBStrength }}</p>
+
+    <hr />
+
     <h2>游戏设置</h2>
+    <p>强度跟随 <u title="开启后对应强度将自动跟随软上限变化">?</u></p>
+    A<input type="checkbox" v-model="followAStrength" />
+    B<input type="checkbox" v-model="followBStrength" />
+
+    <hr />
+
+    <h2>游戏玩法</h2>
+    <p><img src="/img/31036.png" width="18" alt="小花花">强度 -1</p>
+    <p><img src="/img/31039.png" width="18" alt="牛哇牛哇">强度 +1</p>
+  </div>
+  <div>
+    <h2>系统设置</h2>
     <div class="form">
       <label>主播身份码</label>
       <input type="password" placeholder="填写主播身份码" v-model="codeId"/>
@@ -220,6 +245,8 @@ const hideqrcode = () => {
     <h2>调试选项</h2>
     <div class="form">
       <button @click="getAuth">鉴权</button>
+      <label>波形数组 <a onclick="window.open('waveHelper.html', '', 'width=500,height=1000,left=700');">波形助手</a></label>
+      <input type="text" placeholder="填写欲测试的波形数组" v-model="waveData" />
       <button @click="test">测试</button>
     </div>
   </div>

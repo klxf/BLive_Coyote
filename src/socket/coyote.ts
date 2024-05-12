@@ -4,15 +4,17 @@ import QRCode from 'qrcode'
 
 const notyf = new Notyf({ duration: 4000 })
 
-let channelAStrength = 0; // A通道强度
-let channelBStrength = 0; // B通道强度
+let channelAStrength = ref(0);     // A通道强度
+let channelBStrength = ref(0);     // B通道强度
+let softAStrength = ref(0);        // A通道软上限
+let softBStrength = ref(0);        // B通道软上限
+let followAStrength = ref(false);  //跟随A通道软上限
+let followBStrength = ref(false);  //跟随B通道软上限
 
 let connectionId = ""; // 从接口获取的连接标识符
 let targetWSId = ""; // 发送目标
 let fangdou = 500; //500毫秒防抖
 let fangdouSetTimeOut; // 防抖定时器
-let followAStrength = false; //跟随AB软上限
-let followBStrength = false;
 let wsConn; // 全局ws链接
 const feedBackMsg = {
     "feedback-0": "A通道：○",
@@ -36,8 +38,9 @@ QRCode.toDataURL("https://www.dungeon-lab.com/app-download.php#DGLAB-SOCKET#wss:
 
 function createCoyoteSocket() {
     wsConn = new WebSocket('wss://coyote.babyfang.cn/');
+
     wsConn.onopen = function (event) {
-        console.log("WebSocket连接已建立");
+        console.log("WebSocket连接已建立")
     }
 
     wsConn.onmessage = function (event) {
@@ -46,7 +49,7 @@ function createCoyoteSocket() {
             msg = JSON.parse(event.data);
         } catch (e) {
             console.log(event.data);
-            return;
+            return
         }
 
         console.log(event.data)
@@ -64,35 +67,70 @@ function createCoyoteSocket() {
                 } else {
                     if (msg.clientId != connectionId) {
                         console.log("错误的clientId")
-                        return;
+                        return
                     }
                     targetWSId = msg.targetId;
                     console.log("收到targetId: " + msg.targetId + ", msg: " + msg.message);
                     qrcodeShow.value = false
                     notyf.success({message: "郊狼连接成功"})
                 }
-                break;
+                break
             case 'break':
                 if (msg.targetId != targetWSId)
-                    return;
+                    return
                 console.log("收到断开连接指令")
                 notyf.error({ message: "收到断开连接指令" })
                 //location.reload();
-                break;
+                break
             case 'error':
                 if (msg.targetId != targetWSId)
-                    return;
+                    return
                 console.log("对方已断开，code：" + msg.message)
                 notyf.error({ message: "对方已断开（" + msg.message + "）" })
-                break;
+                break
             case 'msg':
                 const result: { type: string; numbers: number[] }[] = []
                 if(msg.message.includes("strength")) {
                     const numbers = msg.message.match(/\d+/g).map(Number)
                     result.push({ type: "strength", numbers: numbers })
-                }
 
+                    console.log(numbers)
+                    channelAStrength.value = numbers[0];
+                    channelBStrength.value = numbers[1];
+
+                    softAStrength.value = numbers[2];
+                    softBStrength.value = numbers[3];
+
+                    if (followAStrength.value && numbers[2] !== numbers[0]) {
+                        const data1 = { type: 4, message: `strength-1+2+${numbers[2]}` }
+                        sendWsMsg(data1)
+                    }
+
+                    if (followBStrength.value && numbers[3] !== numbers[1]) {
+                        const data2 = { type: 4, message: `strength-2+2+${numbers[3]}` }
+                        sendWsMsg(data2)
+                    }
+                } else if (msg.message.includes("feedback")) {
+                    notyf.success({ message: feedBackMsg[msg.message] })
+                }
+                break
+            case 'heartbeat':
+                console.log("收到心跳包")
+                break
+            default:
+                console.log("未知消息类型：" + JSON.stringify(msg));
+                break
         }
+    }
+
+    wsConn.onerror = function (event) {
+        console.log("WebSocket连接出错")
+        notyf.error({ message: "WebSocket连接出错" })
+    }
+
+    wsConn.onclose = function (event) {
+        console.log("WebSocket连接已关闭")
+        notyf.error({ message: "WebSocket连接已关闭" })
     }
 }
 
@@ -108,7 +146,7 @@ function addOrIncrease(type, channelIndex, strength) {
     // 1 减少一  2 增加一  3 设置到
     // channel:1-A    2-B
     // 获取当前频道元素和当前值
-    let channelStrength = channelIndex === 1 ? channelAStrength : channelBStrength;
+    let channelStrength = channelIndex === 1 ? channelAStrength.value : channelBStrength.value;
 
     // 如果是设置操作
     if (type === 3) {
@@ -170,4 +208,19 @@ function closeCoyoteSocket() {
 }
 
 
-export { createCoyoteSocket, closeCoyoteSocket, sendWsMsg, sendWaveData, addOrIncrease, clearAB, qrcodeSrc, qrcodeShow, channelAStrength, channelBStrength }
+export {
+    createCoyoteSocket,
+    closeCoyoteSocket,
+    sendWsMsg,
+    sendWaveData,
+    addOrIncrease,
+    clearAB,
+    qrcodeSrc,
+    qrcodeShow,
+    channelAStrength,
+    channelBStrength,
+    softAStrength,
+    softBStrength,
+    followAStrength,
+    followBStrength
+}

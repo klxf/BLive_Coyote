@@ -13,7 +13,7 @@ const sliderGroups: Ref<SliderGroup[]> = ref([
   reactive({ sliders: [50, 50, 50, 50], autoStrength: true }),
 ]);
 
-const inputFrequency = ref(0)
+const inputFrequency = ref(10)
 
 const waveData = ref()
 
@@ -152,7 +152,7 @@ function deleteGroup(index: number) {
     <button @click="newGroup">新建分组</button>
     <div v-if="waveData">
       <h3>波形数据</h3>
-      <div style="overflow-x: scroll;">{{ JSON.stringify(waveData) }}</div>
+      <textarea style="width: 100%; height: 50px;">{{ JSON.stringify(waveData) }}</textarea>
     </div>
   </div>
 </template>
@@ -168,12 +168,10 @@ function deleteGroup(index: number) {
 }
 
 .slider {
-  writing-mode: bt-lr; /* IE */
-  -webkit-appearance: slider-vertical; /* WebKit */
+  -webkit-appearance: slider-vertical;
   margin-top: 26px;
   width: 8px;
   height: 200px;
   padding: 0 5px;
 }
-
 </style>

@@ -36,6 +36,10 @@ button {
     -o-border-radius: 3px;
 }
 
+a {
+    color: #fce9a7;
+}
+
 button:hover {
     background-color: #ffe668;
 }
@@ -448,6 +452,18 @@ select {
     top: 16px;
     right: 25px;
     position: fixed;
+}
+
+.game-info {
+    position: fixed;
+    top: 64px;
+    right: 60px;
+    padding: 0 10px 10px 10px;
+    color: #ffe99d;
+    background: #171717;
+    border-radius: 10px;
+    border: 1px solid #ffe99d;
+    width: 200px;
 }
 
 .tips-hide {
