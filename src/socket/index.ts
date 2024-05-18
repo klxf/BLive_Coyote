@@ -54,10 +54,8 @@ function createSocket(authBody: string, wssLinks: string[]) {
 
             settings = window.localStorage.getItem("settings") ? ref(JSON.parse(window.localStorage.getItem("settings") || '{}')) : null
 
-            console.log(settings.value)
-
             if (res.cmd == "LIVE_OPEN_PLATFORM_SEND_GIFT") {
-                if (res.data.gift_id.toString() === settings.value.strengthData[0]) {
+                if (settings && res.data.gift_id.toString() === settings.value.strengthData[0]) {
                     // 牛哇牛哇：加强度1
                     try {
                         console.log("开始操作")
@@ -70,7 +68,7 @@ function createSocket(authBody: string, wssLinks: string[]) {
                         console.log(e)
                         notyf.error("强度操作失败！")
                     }
-                } else if (res.data.gift_id.toString() === settings.value.strengthData[1]) {
+                } else if (settings && res.data.gift_id.toString() === settings.value.strengthData[1]) {
                     // 小花花：减强度1
                     try {
                         addOrIncrease(1, 1, 1)
@@ -81,7 +79,7 @@ function createSocket(authBody: string, wssLinks: string[]) {
                         console.log(e)
                         notyf.error("强度操作失败！")
                     }
-                } else if(settings.value.waveData[res.data.gift_id]) {
+                } else if(settings && settings.value.waveData[res.data.gift_id]) {
                     // 其他礼物，发送波形数据
                     try {
                         sendWaveData(5, 5, settings.value.waveData[res.data.gift_id], settings.value.waveData[res.data.gift_id])

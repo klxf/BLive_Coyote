@@ -34,11 +34,12 @@ if (window.localStorage.getItem("settings")) {
   settings.value = JSON.parse(window.localStorage.getItem("settings") || '{}');
   // console.log(settings.value)
 } else {
-  // 如果没有，使用默认值
+  // 如果没有，使用默认值并且保存
   settings.value = {
     waveData: waveData,
     strengthData: strengthData
   };
+  window.localStorage.setItem('settings', JSON.stringify(settings.value));
 }
 
 
