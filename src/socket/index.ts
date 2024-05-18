@@ -10,11 +10,13 @@ const notyf = new Notyf({ duration: 4000 })
 interface SettingsType {
     strengthData: typeof strengthData;
     waveData: typeof waveData;
+    guardLevel: number;
 }
 
 let settings: Ref<SettingsType> = ref({
     waveData: waveData,
-    strengthData: strengthData
+    strengthData: strengthData,
+    guardLevel: 0
 });
 
 if (window.localStorage.getItem("settings")) {
@@ -24,7 +26,8 @@ if (window.localStorage.getItem("settings")) {
     // 如果没有，使用默认值
     settings.value = {
         waveData: waveData,
-        strengthData: strengthData
+        strengthData: strengthData,
+        guardLevel: 0
     };
 }
 
@@ -54,7 +57,7 @@ function createSocket(authBody: string, wssLinks: string[]) {
 
             settings = window.localStorage.getItem("settings") ? ref(JSON.parse(window.localStorage.getItem("settings") || '{}')) : null
 
-            if (res.cmd == "LIVE_OPEN_PLATFORM_SEND_GIFT") {
+            if (res.cmd == "LIVE_OPEN_PLATFORM_SEND_GIFT" && res.data.guard_level > settings.value.guardLevel) {
                 if (settings && res.data.gift_id.toString() === settings.value.strengthData[0]) {
                     // 牛哇牛哇：加强度1
                     try {

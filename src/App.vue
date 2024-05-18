@@ -37,7 +37,8 @@ if (window.localStorage.getItem("settings")) {
   // 如果没有，使用默认值并且保存
   settings.value = {
     waveData: waveData,
-    strengthData: strengthData
+    strengthData: strengthData,
+    guardLevel: 0
   };
   window.localStorage.setItem('settings', JSON.stringify(settings.value));
 }
@@ -268,7 +269,15 @@ const addRelationAndSave = () => {
 
   <div class="settings-window" v-show="showSettings">
     <button @click="showSettings = false" style="float: right">关</button>
+    <button @click="saveSettings" style="float: right">存</button>
     <div>
+      <h2>大航海</h2>
+      <p>
+        大航海等级达到
+        <input v-model="settings.guardLevel">
+        才可互动
+      </p>
+
       <h2>强度规则</h2>
 
       <p>礼物规则 <u title="收到指定礼物后将更新强度">?</u></p>
@@ -297,8 +306,6 @@ const addRelationAndSave = () => {
 
         B<input type="checkbox" v-model="followBStrength" />
       </div>
-
-      <button @click="saveSettings">保存</button>
 
       <h2>波形规则</h2>
       <div>
@@ -352,6 +359,8 @@ const addRelationAndSave = () => {
     <hr />
 
     <h2>游戏玩法</h2>
+    <h3>大航海</h3>
+    <p>等级达到 <input class="tag" v-model="settings.guardLevel" size="1" disabled> 才可互动</p>
     <h3>强度控制</h3>
     <p>
       赠送
