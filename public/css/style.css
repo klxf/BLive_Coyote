@@ -10,6 +10,19 @@ body {
     background-color: #171717;
 }
 
+p, h2 {
+    margin: 10px 0;
+}
+
+h3 {
+    margin: 8px 0;
+}
+
+hr {
+    margin: 10px 0;
+    border: 1px solid #fce9a7;
+}
+
 .icon {
     -webkit-user-select: none;
     user-select: none;
@@ -22,6 +35,10 @@ body {
 
 .hidden {
     display: none;
+}
+
+img {
+    vertical-align: middle;
 }
 
 button {
@@ -53,6 +70,18 @@ select {
     -o-border-radius: 3px;
 }
 
+
+input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    -webkit-appearance: none;
+    border: 1px solid #fce9a7;
+    border-radius: 2px;
+    outline: none;
+}
+input[type="checkbox"]:checked {
+    background: #fce9a7;
+}
 
 /* Offline page */
 
@@ -439,6 +468,35 @@ select {
     position: fixed;
     left: 20px;
     bottom: 10px;
+}
+
+.channel-circle {
+    width: 80px;
+    text-align: center;
+    height: 80px;
+    border-radius: 50%;
+    border: #fce9a7 2px solid;
+    margin: 8px;
+}
+.channel-tag {
+    line-height: 20px;
+    font-size: 18px;
+    color: #fce9a7;
+    background: #171717;
+    transform: translateY(-10px);
+}
+.channel-strength {
+    line-height: 40px;
+    font-size: 32px;
+    color: #fce9a7;
+
+}
+.soft-strength {
+    line-height: 20px;
+    font-size: 18px;
+    color: #fce9a7;
+    background: #171717;
+    transform: translateY(10px);
 }
 
 .game-title {

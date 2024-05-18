@@ -1,10 +1,32 @@
 import DanmakuWebSocket from "../assets/danmaku-websocket.min.js"
 import { Notyf } from 'notyf'
 import { closeCoyoteSocket, addOrIncrease, sendWaveData } from "./coyote"
-import { waveData } from "../assets/dataMap";
+import { waveData, strengthData } from "../assets/dataMap";
+import { Ref, ref } from "vue";
 
 let ws: DanmakuWebSocket
 const notyf = new Notyf({ duration: 4000 })
+
+interface SettingsType {
+    strengthData: typeof strengthData;
+    waveData: typeof waveData;
+}
+
+let settings: Ref<SettingsType> = ref({
+    waveData: waveData,
+    strengthData: strengthData
+});
+
+if (window.localStorage.getItem("settings")) {
+    settings.value = JSON.parse(window.localStorage.getItem("settings") || '{}');
+    console.log(settings.value)
+} else {
+    // 如果没有，使用默认值
+    settings.value = {
+        waveData: waveData,
+        strengthData: strengthData
+    };
+}
 
 /**
  * 创建socket长连接
@@ -30,33 +52,39 @@ function createSocket(authBody: string, wssLinks: string[]) {
             //     }
             // }
 
+            settings = window.localStorage.getItem("settings") ? ref(JSON.parse(window.localStorage.getItem("settings") || '{}')) : null
+
+            console.log(settings.value)
+
             if (res.cmd == "LIVE_OPEN_PLATFORM_SEND_GIFT") {
-                if (res.data.gift_id == 31036) {
+                if (res.data.gift_id.toString() === settings.value.strengthData[0]) {
+                    // 牛哇牛哇：加强度1
+                    try {
+                        console.log("开始操作")
+                        addOrIncrease(2, 1, 1)
+                        addOrIncrease(2, 2, 1)
+                        console.log("结束操作")
+                        notyf.success("收到" + res.data.gift_name + "，强度+1")
+                    }
+                    catch (e) {
+                        console.log(e)
+                        notyf.error("强度操作失败！")
+                    }
+                } else if (res.data.gift_id.toString() === settings.value.strengthData[1]) {
                     // 小花花：减强度1
                     try {
                         addOrIncrease(1, 1, 1)
                         addOrIncrease(1, 2, 1)
-                        notyf.success("收到花花，强度-1")
+                        notyf.success("收到" + res.data.gift_name + "，强度-1")
                     }
                     catch (e) {
                         console.log(e)
                         notyf.error("强度操作失败！")
                     }
-                } else if (res.data.gift_id == 31039) {
-                    // 牛哇牛哇：加强度1
-                    try {
-                        addOrIncrease(2, 1, 1)
-                        addOrIncrease(2, 2, 1)
-                        notyf.success("收到牛牛，强度+1")
-                    }
-                    catch (e) {
-                        console.log(e)
-                        notyf.error("强度操作失败！")
-                    }
-                } else {
+                } else if(settings.value.waveData[res.data.gift_id]) {
                     // 其他礼物，发送波形数据
                     try {
-                        sendWaveData(5, 5, waveData[res.data.gift_id], waveData[res.data.gift_id])
+                        sendWaveData(5, 5, settings.value.waveData[res.data.gift_id], settings.value.waveData[res.data.gift_id])
                         notyf.success("收到礼物" + res.data.gift_name)
                     }
                     catch (e) {

@@ -20,6 +20,7 @@
     "vue-tsc": "0.29.8",
     "ws": "8.17.0",
     "qrcode": "1.5.3",
-    "notyf": "3.0.0"
+    "notyf": "3.0.0",
+    "node-localstorage": "3.0.5"
   }
 }
