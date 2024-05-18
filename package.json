@@ -1,7 +1,7 @@
 {
   "name": "blive-coyote-demo-client",
   "private": true,
-  "version": "0.0.1",
+  "version": "1.0.0",
   "scripts": {
     "dev": "vite --port 8888 --host 0.0.0.0 ",
     "build": "vue-tsc --noEmit && vite build",
