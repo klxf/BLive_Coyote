@@ -57,7 +57,7 @@ function createSocket(authBody: string, wssLinks: string[]) {
 
             settings = window.localStorage.getItem("settings") ? ref(JSON.parse(window.localStorage.getItem("settings") || '{}')) : null
 
-            if (res.cmd == "LIVE_OPEN_PLATFORM_SEND_GIFT" && res.data.guard_level > settings.value.guardLevel) {
+            if (res.cmd == "LIVE_OPEN_PLATFORM_SEND_GIFT" && res.data.guard_level >= settings.value.guardLevel) {
                 if (settings && res.data.gift_id.toString() === settings.value.strengthData[0]) {
                     // 牛哇牛哇：加强度1
                     try {
