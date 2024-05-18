@@ -25,7 +25,7 @@ const notyf = new Notyf({ duration: 3000 })
 
 // API
 const api = axios.create({
-    baseURL: "https://blive.babyfang.cn/",
+    baseURL: "http://localhost:3000",
 })
 
 //读取本地储存数据
