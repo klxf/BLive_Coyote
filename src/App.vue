@@ -31,7 +31,7 @@ const api = axios.create({
 
 //读取本地储存数据
 let settings = ref()
-const settings_text = localStorage.getItem('settings')
+const settings_text = localStorage.getItem('settings') || ''
 const settings_version = 1
 let showUpgrade = ref(false)
 if (window.localStorage.getItem("settings")) {
