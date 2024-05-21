@@ -52,6 +52,7 @@ if (window.localStorage.getItem("settings")) {
   };
   window.localStorage.setItem('settings', JSON.stringify(settings.value));
 }
+let showSafetyNotice = ref(localStorage.getItem('showSafetyNotice') !== 'false')
 
 const upgradeSettings = () => {
   // 目前结构没变化，所以补全不存在的项就行了
@@ -102,7 +103,27 @@ const selectedGift = ref('')
 const selectedWave = ref('')
 const relations = ref(Object.entries(giftData).map(([key, value]) => ({ gift: key, wave: settings.value.waveData[key] })))
 
-// console.log(relations.value)
+// 安全须知相关
+let canAcknowledgeSafetyNotice = ref(false)
+let canAcknowledgeSafetyNoticeCountdown = ref(15)
+let canAcknowledgeSafetyNoticeTimer = setInterval(() => {
+  canAcknowledgeSafetyNoticeCountdown.value--
+  if (canAcknowledgeSafetyNoticeCountdown.value <= 0) {
+    canAcknowledgeSafetyNotice.value = true
+    clearInterval(canAcknowledgeSafetyNoticeTimer)
+  }
+}, 1000)
+
+let safetyNotices = ref([
+  "<b>请保证在安全、清醒、自愿的情况下使用</b>",
+  "严禁体内存在<b>电子/金属植入物者、心脑血管疾病患者、孕妇、儿童或无法及时操作主机</b>的人群使用",
+  "严禁将电极置于<b>心脏投影区</b>（或任何可能使电流经过心脏的位置），以及<b>头部、颈部、皮肤破损处</b>等位置",
+  "严禁在驾驶或操纵机器等危险情况下使用",
+  "请勿在同一部位连续使用<b>30分钟以上</b>，以免造成损伤",
+  "请勿在<b>输出状态下</b>移动电极，以免造成刺痛或灼伤",
+  "在直播过程中使用<b>可能会导致直播间被封禁</b>，风险自负",
+  "在使用前需要<b>完整阅读郊狼产品安全须知，并设置好强度上限保护</b>",
+])
 
 watch(selectedGift, (newGift) => {
   selectedWave.value = waveData[newGift]
@@ -295,6 +316,14 @@ const addRelationAndSave = () => {
 }
 
 /**
+ * 阅读安全须知
+ */
+const acknowledgeSafetyNotice = () => {
+  showSafetyNotice.value = false
+  localStorage.setItem('showSafetyNotice', 'false')
+}
+
+/**
  * 将数字大航海等级转换为文字
  */
 const guardLevelText = computed(() => {
@@ -327,20 +356,37 @@ const guardLevelText = computed(() => {
     </div>
   </div>
 
+  <div class="settings-window-bg" v-show="showUpgrade || showSettings || showSafetyNotice"></div>
 
   <div class="settings-window" v-show="showUpgrade">
-    <h2>【重要】设置结构现已更新，请确认执行升级操作</h2>
+    <h2>⚠ 本地设置数据升级</h2>
     <p>
-      目前设置数据储存结构版本为<input class="tag" v-model="settings_version" size="1" disabled>，你设备上储存的设置数据的结构版本为<input class="tag" v-model="settings.version" size="1" disabled>。
+      目前可读取的本地设置数据的储存结构版本为<input class="tag" v-model="settings_version" size="1" disabled>，你的设备上现有的设置数据的储存结构版本为<input class="tag" v-model="settings.version" size="1" disabled>。
     </p>
     <p>
-      为了可以安全使用 BLive Coyote 需将你设备上储存的设置数据进行升级，这通常可以自动进行，如果出现意外请联系开发者。
+      为了可以安全使用 BLive Coyote，现在需要将你设备上储存的设置数据进行升级，这个过程通常可以自动进行，如果出现意外请联系开发者。
     </p>
     <hr />
-    <p>【注意】请先复制下面的全部内容，以确保在升级失败时可以恢复</p>
+    <p>【注意】下面是你的全部设置数据，请先复制下面的全部内容，以确保在升级失败时可以恢复！</p>
     <textarea v-model="settings_text" style="width: 100%; height: 64px;"></textarea>
     <div class="form">
       <button @click="upgradeSettings">尝试执行升级</button>
+    </div>
+  </div>
+
+  <div class="settings-window" v-show="showSafetyNotice">
+    <h2>⚠ 安全须知</h2>
+    <p v-for="(notice, index) in safetyNotices"
+       :key="index" class="animated-notice"
+       :style="`animation-delay: ${index*2}s`"
+       v-html="notice">
+    </p>
+    <hr />
+    <p>【注意】请仔细阅读以上内容后，点击“<b>我已知晓</b>”</p>
+    <div class="form">
+      <button @click="acknowledgeSafetyNotice" :disabled="!canAcknowledgeSafetyNotice">
+        我已知晓{{canAcknowledgeSafetyNoticeCountdown != 0 ? "（" + canAcknowledgeSafetyNoticeCountdown + "）" : ""}}
+      </button>
     </div>
   </div>
 
@@ -479,8 +525,6 @@ const guardLevelText = computed(() => {
       </div>
     </div>
 
-
-
     <button @click="showSettings = true">修改玩法</button>
   </div>
   <div>
@@ -523,25 +567,5 @@ const guardLevelText = computed(() => {
   height: 50px;
   margin: 10px 0;
   font-size: 18px;
-}
-
-.settings-window {
-  position: fixed;
-  top: 10%;
-  bottom: 10%;
-  height: 500px;
-  left: 10%;
-  right: 10%;
-  background-color: #171717;
-  border-radius: 20px;
-  border: #ffe99d 2px solid;
-  z-index: 100;
-  padding: 20px;
-}
-
-.tag {
-  background: #fce9a7;
-  color: #000;
-  border-radius: 5px;
 }
 </style>
