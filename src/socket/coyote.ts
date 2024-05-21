@@ -11,6 +11,8 @@ let softBStrength = ref(0);        // B通道软上限
 let followAStrength = ref(false);  //跟随A通道软上限
 let followBStrength = ref(false);  //跟随B通道软上限
 
+const coyoteState = ref(false)
+
 let connectionId = ""; // 从接口获取的连接标识符
 let targetWSId = ""; // 发送目标
 let fangdou = 500; //500毫秒防抖
@@ -73,6 +75,7 @@ function createCoyoteSocket() {
                     console.log("收到targetId: " + msg.targetId + ", msg: " + msg.message);
                     qrcodeShow.value = false
                     notyf.success({message: "郊狼连接成功"})
+                    coyoteState.value = true
                 }
                 break
             case 'break':
@@ -80,6 +83,7 @@ function createCoyoteSocket() {
                     return
                 console.log("收到断开连接指令")
                 notyf.error({ message: "收到断开连接指令" })
+                coyoteState.value = false
                 //location.reload();
                 break
             case 'error':
@@ -87,6 +91,7 @@ function createCoyoteSocket() {
                     return
                 console.log("对方已断开，code：" + msg.message)
                 notyf.error({ message: "对方已断开（" + msg.message + "）" })
+                coyoteState.value = false
                 break
             case 'msg':
                 const result: { type: string; numbers: number[] }[] = []
@@ -126,11 +131,13 @@ function createCoyoteSocket() {
     wsConn.onerror = function (event) {
         console.log("WebSocket连接出错")
         notyf.error({ message: "WebSocket连接出错" })
+        coyoteState.value = false
     }
 
     wsConn.onclose = function (event) {
         console.log("WebSocket连接已关闭")
         notyf.error({ message: "WebSocket连接已关闭" })
+        coyoteState.value = false
     }
 }
 
@@ -205,6 +212,7 @@ function closeCoyoteSocket() {
     }
     wsConn = null
     notyf.success( {message: "郊狼连接已断开"} )
+    coyoteState.value = false
 }
 
 
@@ -215,6 +223,7 @@ export {
     sendWaveData,
     addOrIncrease,
     clearAB,
+    coyoteState,
     qrcodeSrc,
     qrcodeShow,
     channelAStrength,

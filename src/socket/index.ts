@@ -8,15 +8,19 @@ let ws: DanmakuWebSocket
 const notyf = new Notyf({ duration: 4000 })
 
 interface SettingsType {
+    version: number;
     strengthData: typeof strengthData;
     waveData: typeof waveData;
     guardLevel: number;
+    fansMedal: boolean;
 }
 
 let settings: Ref<SettingsType> = ref({
+    version: 1,
     waveData: waveData,
     strengthData: strengthData,
-    guardLevel: 0
+    guardLevel: 0,
+    fansMedal: false
 });
 
 if (window.localStorage.getItem("settings")) {
@@ -25,10 +29,31 @@ if (window.localStorage.getItem("settings")) {
 } else {
     // 如果没有，使用默认值
     settings.value = {
+        version: 1,
         waveData: waveData,
         strengthData: strengthData,
-        guardLevel: 0
+        guardLevel: 0,
+        fansMedal: false
     };
+}
+
+/**
+ * 转换大航海等级
+ * @description 由于B站返回的大航海等级是（1-总督，2-提督，3-舰长）所以要转换一下方便处理
+ * @param guardLevel
+ */
+const transformGuardLevel = (guardLevel: number) => {
+    if (guardLevel == 0) {
+        return 0
+    } else if (guardLevel == 1) {
+        return 3
+    } else if (guardLevel == 2) {
+        return 2
+    } else if (guardLevel == 3) {
+        return 1
+    } else {
+        return 0
+    }
 }
 
 /**
@@ -57,9 +82,16 @@ function createSocket(authBody: string, wssLinks: string[]) {
 
             settings = window.localStorage.getItem("settings") ? ref(JSON.parse(window.localStorage.getItem("settings") || '{}')) : null
 
-            if (res.cmd == "LIVE_OPEN_PLATFORM_SEND_GIFT" && res.data.guard_level >= settings.value.guardLevel) {
+            // 粉丝勋章
+            let execute_1 = settings.value.fansMedal ? !!res.data.fans_medal_wearing_status : true
+
+            // 大航海
+            let execute_2 = transformGuardLevel(res.data.guard_level) >= settings.value.guardLevel
+
+
+            if (res.cmd == "LIVE_OPEN_PLATFORM_SEND_GIFT" && execute_1 && execute_2) {
                 if (settings && res.data.gift_id.toString() === settings.value.strengthData[0]) {
-                    // 牛哇牛哇：加强度1
+                    // 加强度1
                     try {
                         console.log("开始操作")
                         addOrIncrease(2, 1, 1)
@@ -72,7 +104,7 @@ function createSocket(authBody: string, wssLinks: string[]) {
                         notyf.error("强度操作失败！")
                     }
                 } else if (settings && res.data.gift_id.toString() === settings.value.strengthData[1]) {
-                    // 小花花：减强度1
+                    // 减强度1
                     try {
                         addOrIncrease(1, 1, 1)
                         addOrIncrease(1, 2, 1)

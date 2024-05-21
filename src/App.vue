@@ -1,7 +1,7 @@
 <script setup lang="ts">
 // This starter template is using Vue 3 <script setup> SFCs
 // Check out https://v3.vuejs.org/api/sfc-script-setup.html#sfc-script-setup
-import { ref, watch } from "vue"
+import {computed, ref, watch} from "vue"
 import axios from "axios"
 import { Notyf } from 'notyf'
 import { createSocket, destroySocket } from "./socket/index"
@@ -10,6 +10,7 @@ import {
   closeCoyoteSocket,
   addOrIncrease,
   sendWaveData,
+  coyoteState,
   qrcodeSrc,
   qrcodeShow,
   channelAStrength,
@@ -30,19 +31,51 @@ const api = axios.create({
 
 //读取本地储存数据
 let settings = ref()
+const settings_text = localStorage.getItem('settings')
+const settings_version = 1
+let showUpgrade = ref(false)
 if (window.localStorage.getItem("settings")) {
-  settings.value = JSON.parse(window.localStorage.getItem("settings") || '{}');
+  settings.value = JSON.parse(window.localStorage.getItem("settings") || '{}')
+  if (settings.value.version != settings_version) {
+    // 如果版本不一致，则提示是否修复
+    showUpgrade.value = true
+  }
   // console.log(settings.value)
 } else {
   // 如果没有，使用默认值并且保存
   settings.value = {
+    version: 1,
     waveData: waveData,
     strengthData: strengthData,
-    guardLevel: 0
+    guardLevel: 0,
+    fansMedal: false
   };
   window.localStorage.setItem('settings', JSON.stringify(settings.value));
 }
 
+const upgradeSettings = () => {
+  // 目前结构没变化，所以补全不存在的项就行了
+  const old_settings = JSON.parse(window.localStorage.getItem("settings") || '{}')
+  const old_waveData = old_settings?.waveData ? old_settings.waveData : waveData
+  const old_strengthData = old_settings?.strengthData ? old_settings.strengthData : strengthData
+  const old_guardLevel = old_settings?.guardLevel ? old_settings.guardLevel : "0"
+  const old_fansMedal = old_settings?.fansMedal ? old_settings.fansMedal : false
+
+  settings.value = {
+    version: settings_version,
+    waveData: old_waveData,
+    strengthData: old_strengthData,
+    guardLevel: old_guardLevel,
+    fansMedal: old_fansMedal
+  }
+
+  window.localStorage.setItem('settings', JSON.stringify(settings.value));
+
+  console.log(settings.value)
+
+  showUpgrade.value = false
+  notyf.success("升级成功")
+}
 
 // 替换你的主播身份码
 const codeId = ref("")
@@ -62,6 +95,9 @@ const waveTestData = ref("")
 // 显示设置窗口
 const showSettings = ref(false)
 
+// 连接状态
+const gameState = ref(false)
+
 const selectedGift = ref('')
 const selectedWave = ref('')
 const relations = ref(Object.entries(giftData).map(([key, value]) => ({ gift: key, wave: settings.value.waveData[key] })))
@@ -72,6 +108,10 @@ watch(selectedGift, (newGift) => {
   selectedWave.value = waveData[newGift]
 })
 
+const fansMedal = computed({
+  get: () => settings.value.fansMedal,
+  set: (value) => { settings.value.fansMedal = value === 'true' }
+});
 
 /**
  * 测试请求鉴权接口
@@ -127,6 +167,7 @@ const gameStart = () => {
             heartBeatThis(game_info.game_id)
           }, 20000)
           handleCreateSocket()
+          gameState.value = true
         } else {
           console.log("-----游戏开始失败-----")
           console.log("原因：", data)
@@ -160,6 +201,7 @@ const gameEnd = () => {
           handleDestroySocket()
           console.log("-----心跳关闭成功-----")
           notyf.success({ message: "游戏关闭成功" })
+          gameState.value = false
         } else {
           console.log("-----游戏关闭失败-----")
           console.log("原因：", data)
@@ -251,6 +293,24 @@ const addRelationAndSave = () => {
   // 保存设置
   saveSettings();
 }
+
+/**
+ * 将数字大航海等级转换为文字
+ */
+const guardLevelText = computed(() => {
+  switch (settings.value.guardLevel) {
+    case "0":
+      return "观众";
+    case "1":
+      return "舰长";
+    case "2":
+      return "提督";
+    case "3":
+      return "总督";
+    default:
+      return "未知";
+  }
+})
 </script>
 
 <template>
@@ -267,15 +327,42 @@ const addRelationAndSave = () => {
     </div>
   </div>
 
+
+  <div class="settings-window" v-show="showUpgrade">
+    <h2>【重要】设置结构现已更新，请确认执行升级操作</h2>
+    <p>
+      目前设置数据储存结构版本为<input class="tag" v-model="settings_version" size="1" disabled>，你设备上储存的设置数据的结构版本为<input class="tag" v-model="settings.version" size="1" disabled>。
+    </p>
+    <p>
+      为了可以安全使用 BLive Coyote 需将你设备上储存的设置数据进行升级，这通常可以自动进行，如果出现意外请联系开发者。
+    </p>
+    <hr />
+    <p>【注意】请先复制下面的全部内容，以确保在升级失败时可以恢复</p>
+    <textarea v-model="settings_text" style="width: 100%; height: 64px;"></textarea>
+    <div class="form">
+      <button @click="upgradeSettings">尝试执行升级</button>
+    </div>
+  </div>
+
   <div class="settings-window" v-show="showSettings">
     <button @click="showSettings = false" style="float: right">关</button>
     <button @click="saveSettings" style="float: right">存</button>
     <div>
       <h2>大航海</h2>
       <p>
-        大航海等级达到
-        <input v-model="settings.guardLevel">
-        才可互动
+        身份至低为
+        <select v-model="settings.guardLevel">
+          <option value="0">观众</option>
+          <option value="1">舰长</option>
+          <option value="2">提督</option>
+          <option value="3">总督</option>
+        </select>
+        且
+        <select v-model="fansMedal">
+          <option value="true">需要</option>
+          <option value="false">不需要</option>
+        </select>
+        佩戴粉丝牌才可互动
       </p>
 
       <h2>强度规则</h2>
@@ -360,7 +447,13 @@ const addRelationAndSave = () => {
 
     <h2>游戏玩法</h2>
     <h3>大航海</h3>
-    <p>等级达到 <input class="tag" v-model="settings.guardLevel" size="1" disabled> 才可互动</p>
+    <p>
+      身份至低为
+      <input class="tag" v-model="guardLevelText" size="1" disabled>
+      且
+      <span class="tag">{{ settings["fansMedal"] ? "需要" : "不需要" }}</span>
+      佩戴粉丝牌才可互动
+    </p>
     <h3>强度控制</h3>
     <p>
       赠送
@@ -381,7 +474,7 @@ const addRelationAndSave = () => {
       <div v-for="relation in relations" :key="relation.gift">
         <div v-if="relation && relation.wave">
           <img :src="'/img/' + relation.gift + '.png'" width="24" :alt="giftData[relation.gift]">
-          <input class="tag" v-model="giftData[relation.gift]" disabled>
+          <input class="tag" v-model="giftData[relation.gift]" size="8" disabled>
         </div>
       </div>
     </div>
@@ -397,10 +490,10 @@ const addRelationAndSave = () => {
       <input type="password" placeholder="填写主播身份码" v-model="codeId"/>
       <label>app_id</label>
       <input type="text" placeholder="填写 app_id" v-model="appId" />
-      <button @click="gameStart">游戏开始</button>
-      <button @click="gameEnd">游戏结束</button>
-      <button @click="createCoyoteSocket">连接郊狼</button>
-      <button @click="closeCoyoteSocket">断开郊狼</button>
+      <button @click="gameStart" v-show="!gameState">游戏开始</button>
+      <button @click="gameEnd" v-show="gameState">游戏结束</button>
+      <button @click="createCoyoteSocket" v-show="!coyoteState">连接郊狼</button>
+      <button @click="closeCoyoteSocket" v-show="coyoteState">断开郊狼</button>
     </div>
 
     <hr />
