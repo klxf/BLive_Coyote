@@ -95,6 +95,9 @@ clearInterval(heartBeatTimer.value!)
 const waveTestData = ref("")
 // 显示设置窗口
 const showSettings = ref(false)
+// 显示游戏开始警告
+const showWarnWindow = ref(false)
+const warnWindowCountdown = ref(5);
 
 // 连接状态
 const gameState = ref(false)
@@ -128,6 +131,19 @@ let safetyNotices = ref([
 watch(selectedGift, (newGift) => {
   selectedWave.value = waveData[newGift]
 })
+
+watch(showWarnWindow, (newVal) => {
+  if (newVal) {
+    let timer = setInterval(() => {
+      warnWindowCountdown.value--;
+      if (warnWindowCountdown.value <= 0) {
+        clearInterval(timer);
+      }
+    }, 1000);
+  } else {
+    warnWindowCountdown.value = 5; // 重置倒计时
+  }
+});
 
 const fansMedal = computed({
   get: () => settings.value.fansMedal,
@@ -188,6 +204,7 @@ const gameStart = () => {
             heartBeatThis(game_info.game_id)
           }, 20000)
           handleCreateSocket()
+          showLiveWarn()
           gameState.value = true
         } else {
           console.log("-----游戏开始失败-----")
@@ -324,6 +341,17 @@ const acknowledgeSafetyNotice = () => {
 }
 
 /**
+ * 显示直播警告
+ */
+const showLiveWarn = () => {
+  showWarnWindow.value = true
+  // 五秒后关闭
+  setTimeout(() => {
+    showWarnWindow.value = false
+  }, 5000)
+}
+
+/**
  * 将数字大航海等级转换为文字
  */
 const guardLevelText = computed(() => {
@@ -356,7 +384,7 @@ const guardLevelText = computed(() => {
     </div>
   </div>
 
-  <div class="settings-window-bg" v-show="showUpgrade || showSettings || showSafetyNotice"></div>
+  <div class="settings-window-bg" v-show="showUpgrade || showSettings || showSafetyNotice || showWarnWindow"></div>
 
   <div class="settings-window" v-show="showUpgrade">
     <h2>⚠ 本地设置数据升级</h2>
@@ -387,6 +415,16 @@ const guardLevelText = computed(() => {
       <button @click="acknowledgeSafetyNotice" :disabled="!canAcknowledgeSafetyNotice">
         我已知晓{{canAcknowledgeSafetyNoticeCountdown != 0 ? "（" + canAcknowledgeSafetyNoticeCountdown + "）" : ""}}
       </button>
+    </div>
+  </div>
+
+  <div class="warn-window" v-show="showWarnWindow">
+    <div style="font-size: 52px">
+      <b>⚠</b>
+    </div>
+    <hr />
+    <div style="margin: auto">
+      <b>【注意】</b>请不要在直播过程中展示或使用郊狼主机及配件，直播务必遵守平台规则，否则可能导致账号被封禁！（{{ warnWindowCountdown }}）
     </div>
   </div>
 
@@ -567,5 +605,22 @@ const guardLevelText = computed(() => {
   height: 50px;
   margin: 10px 0;
   font-size: 18px;
+}
+
+.warn-window {
+  display: flex;
+  position: fixed;
+  top: 40%;
+  bottom: 40%;
+  left: 20%;
+  right: 20%;
+  background-color: #a00;
+  border-radius: 20px;
+  border: #ffe99d 2px solid;
+  z-index: 100;
+  padding: 20px;
+}
+.warn-window > * {
+  margin: 10px;
 }
 </style>
