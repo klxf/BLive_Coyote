@@ -146,31 +146,37 @@ function sendWsMsg(messageObj) {
     messageObj.targetId = targetWSId;
     if (!messageObj.hasOwnProperty('type'))
         messageObj.type = "msg";
-    wsConn.send(JSON.stringify((messageObj)));
+    wsConn.send(JSON.stringify((messageObj)))
 }
 
 function addOrIncrease(type, channelIndex, strength) {
-    // 1 减少一  2 增加一  3 设置到
+    // 1 减少  2 增加  3 设置到
     // channel:1-A    2-B
-    // 获取当前频道元素和当前值
+    // 获取当前通道的当前值
     let channelStrength = channelIndex === 1 ? channelAStrength.value : channelBStrength.value;
 
     // 如果是设置操作
     if (type === 3) {
-        channelStrength = strength; //固定为0
+        channelStrength = strength
     }
-    // 减少一
+    // 减少
     else if (type === 1) {
-        channelStrength = Math.max(channelStrength - strength, 0);
+        channelStrength = Math.max(channelStrength - strength, 0)
     }
-    // 增加一
+    // 增加
     else if (type === 2) {
-        channelStrength = Math.min(channelStrength + strength, 200);
+        channelStrength = Math.min(channelStrength + strength, 200)
     }
 
     // 构造消息对象并发送
-    const data = { type, strength: channelStrength, message: "set channel", channel: channelIndex };
-    console.log(data)
+    let data = {}
+    if (type === 3) {
+        data = { type, strength: channelStrength, message: "set channel", channel: channelIndex }
+    } else {
+        // 这里用 type 4 可以自定义增加减小是数值，type 2/3 固定是 1
+        data = { type: 4, message: "strength-" + channelIndex + "+" + (type - 1) + "+" + strength }
+    }
+
     sendWsMsg(data);
 }
 

@@ -93,11 +93,9 @@ function createSocket(authBody: string, wssLinks: string[]) {
                 if (settings && res.data.gift_id.toString() === settings.value.strengthData[0]) {
                     // 加强度1
                     try {
-                        console.log("开始操作")
-                        addOrIncrease(2, 1, 1)
-                        addOrIncrease(2, 2, 1)
-                        console.log("结束操作")
-                        notyf.success("收到" + res.data.gift_name + "，强度+1")
+                        addOrIncrease(2, 1, res.data.gift_num)
+                        addOrIncrease(2, 2, res.data.gift_num)
+                        notyf.success("收到" + res.data.gift_name + "，强度+" + res.data.gift_num)
                     }
                     catch (e) {
                         console.log(e)
@@ -106,9 +104,9 @@ function createSocket(authBody: string, wssLinks: string[]) {
                 } else if (settings && res.data.gift_id.toString() === settings.value.strengthData[1]) {
                     // 减强度1
                     try {
-                        addOrIncrease(1, 1, 1)
-                        addOrIncrease(1, 2, 1)
-                        notyf.success("收到" + res.data.gift_name + "，强度-1")
+                        addOrIncrease(1, 1, res.data.gift_num)
+                        addOrIncrease(1, 2, res.data.gift_num)
+                        notyf.success("收到" + res.data.gift_name + "，强度-" + res.data.gift_num)
                     }
                     catch (e) {
                         console.log(e)
@@ -117,8 +115,8 @@ function createSocket(authBody: string, wssLinks: string[]) {
                 } else if(settings && settings.value.waveData[res.data.gift_id]) {
                     // 其他礼物，发送波形数据
                     try {
-                        sendWaveData(5, 5, settings.value.waveData[res.data.gift_id], settings.value.waveData[res.data.gift_id])
-                        notyf.success("收到礼物" + res.data.gift_name)
+                        sendWaveData(5 * res.data.gift_num, 5 * res.data.gift_num, settings.value.waveData[res.data.gift_id], settings.value.waveData[res.data.gift_id])
+                        notyf.success("收到礼物" + res.data.gift_name + "*"+res.data.gift_num)
                     }
                     catch (e) {
                         console.log(e)
