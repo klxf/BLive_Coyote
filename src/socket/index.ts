@@ -14,6 +14,9 @@ interface SettingsType {
     guardLevel: number;
     fansMedal: boolean;
 }
+interface TestSettingsType {
+    falloff: number[];
+}
 
 let settings: Ref<SettingsType> = ref({
     version: 1,
@@ -21,21 +24,22 @@ let settings: Ref<SettingsType> = ref({
     strengthData: strengthData,
     guardLevel: 0,
     fansMedal: false
-});
+})
+
+let testSettings: Ref<TestSettingsType> = ref({
+    falloff: [0, 0],
+})
 
 if (window.localStorage.getItem("settings")) {
     settings.value = JSON.parse(window.localStorage.getItem("settings") || '{}');
     console.log(settings.value)
-} else {
-    // 如果没有，使用默认值
-    settings.value = {
-        version: 1,
-        waveData: waveData,
-        strengthData: strengthData,
-        guardLevel: 0,
-        fansMedal: false
-    };
 }
+if (window.localStorage.getItem("test")) {
+    testSettings.value = JSON.parse(window.localStorage.getItem("test") || '{}');
+    console.log(testSettings.value)
+}
+
+let waveCounter = testSettings.value.falloff[0]
 
 /**
  * 转换大航海等级
@@ -66,20 +70,7 @@ function createSocket(authBody: string, wssLinks: string[]) {
         ...getWebSocketConfig(authBody, wssLinks),
         // 收到消息,
         onReceivedMessage: (res) => {
-            console.log("收到"+ res.cmd +"消息：")
-            //console.log(res.data.uname + "（大航海" +res.data.guard_level + "级）：" + res.data.msg)
-
-            // if (res.data.msg == "#UPA1") {
-            //     try {
-            //         addOrIncrease(2, 1, 1)
-            //         notyf.success("A通道强度增加成功")
-            //     }
-            //     catch (e) {
-            //         console.log(e)
-            //         notyf.error("A通道强度增加失败")
-            //     }
-            // }
-
+            // 从本地存储中获取设置
             settings = window.localStorage.getItem("settings") ? ref(JSON.parse(window.localStorage.getItem("settings") || '{}')) : null
 
             // 粉丝勋章
@@ -88,10 +79,9 @@ function createSocket(authBody: string, wssLinks: string[]) {
             // 大航海
             let execute_2 = transformGuardLevel(res.data.guard_level) >= settings.value.guardLevel
 
-
             if (res.cmd == "LIVE_OPEN_PLATFORM_SEND_GIFT" && execute_1 && execute_2) {
                 if (settings && res.data.gift_id.toString() === settings.value.strengthData[0]) {
-                    // 加强度1
+                    // 加强度
                     try {
                         addOrIncrease(2, 1, res.data.gift_num)
                         addOrIncrease(2, 2, res.data.gift_num)
@@ -102,7 +92,7 @@ function createSocket(authBody: string, wssLinks: string[]) {
                         notyf.error("强度操作失败！")
                     }
                 } else if (settings && res.data.gift_id.toString() === settings.value.strengthData[1]) {
-                    // 减强度1
+                    // 减强度
                     try {
                         addOrIncrease(1, 1, res.data.gift_num)
                         addOrIncrease(1, 2, res.data.gift_num)
@@ -117,6 +107,14 @@ function createSocket(authBody: string, wssLinks: string[]) {
                     try {
                         sendWaveData(5 * res.data.gift_num, 5 * res.data.gift_num, settings.value.waveData[res.data.gift_id], settings.value.waveData[res.data.gift_id])
                         notyf.success("收到礼物" + res.data.gift_name + "*"+res.data.gift_num)
+                        waveCounter--
+                        console.log(waveCounter)
+                        if (waveCounter == 0 && testSettings.value.falloff[0] > 0) {
+                            notyf.success("触发强度衰减")
+                            waveCounter = testSettings.value.falloff[0]
+                            addOrIncrease(1, 1, testSettings.value.falloff[1])
+                            addOrIncrease(1, 2, testSettings.value.falloff[1])
+                        }
                     }
                     catch (e) {
                         console.log(e)

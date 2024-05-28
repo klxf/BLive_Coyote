@@ -685,8 +685,6 @@ select {
     color: #000;
 }
 
-
-
 .settings-window {
     position: fixed;
     top: 10%;
@@ -699,6 +697,25 @@ select {
     border: #ffe99d 2px solid;
     z-index: 100;
     padding: 20px;
+}
+.settings-window-body {
+    overflow-y: auto;
+    height: 500px;
+}
+.settings-window-body::-webkit-scrollbar {
+    width: 10px; /* 宽度 */
+}
+
+.settings-window-body::-webkit-scrollbar-track {
+    background: transparent; /* 轨道颜色 */
+}
+
+.settings-window-body::-webkit-scrollbar-thumb {
+    background: #ffe99d; /* 滚动条颜色 */
+}
+
+.settings-window-body::-webkit-scrollbar-thumb:hover {
+    background: #ffe99d; /* 滚动条鼠标悬停颜色 */
 }
 
 .tag {

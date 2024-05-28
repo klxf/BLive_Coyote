@@ -31,6 +31,7 @@ const api = axios.create({
 
 //读取本地储存数据
 let settings = ref()
+let test_settings = ref()
 const settings_text = localStorage.getItem('settings') || ''
 const settings_version = 1
 let showUpgrade = ref(false)
@@ -49,8 +50,17 @@ if (window.localStorage.getItem("settings")) {
     strengthData: strengthData,
     guardLevel: 0,
     fansMedal: false
-  };
-  window.localStorage.setItem('settings', JSON.stringify(settings.value));
+  }
+  window.localStorage.setItem('settings', JSON.stringify(settings.value))
+}
+
+if (window.localStorage.getItem("test")) {
+  test_settings.value = JSON.parse(window.localStorage.getItem("test") || '{}')
+} else {
+  test_settings.value = {
+    falloff: [0, 0]
+  }
+  window.localStorage.setItem('test', JSON.stringify(test_settings.value))
 }
 let showSafetyNotice = ref(localStorage.getItem('showSafetyNotice') !== 'false')
 
@@ -156,8 +166,14 @@ const fansMedal = computed({
 const getAuth = () => {
   api.post("/getAuth", {})
       .then(({ data }) => {
-        console.log("-----鉴权成功-----")
-        notyf.success({ message: "鉴权成功" })
+        if (typeof data.code !== "number") {
+          console.log("-----鉴权失败-----")
+          notyf.error({ message: "服务端异常" })
+          return
+        } else {
+          console.log("-----鉴权成功-----")
+          notyf.success({ message: "鉴权成功" })
+        }
       })
       .catch((err) => {
         console.log("-----鉴权失败-----")
@@ -308,6 +324,10 @@ const saveSettings = () => {
   window.localStorage.setItem('settings', JSON.stringify(settings.value));
   console.log(settings.value);
 }
+const saveTestSettings = () => {
+  window.localStorage.setItem('test', JSON.stringify(test_settings.value));
+  console.log(test_settings.value);
+}
 
 /**
  * 添加并保存 waveData
@@ -429,9 +449,11 @@ const guardLevelText = computed(() => {
   </div>
 
   <div class="settings-window" v-show="showSettings">
-    <button @click="showSettings = false" style="float: right">关</button>
-    <button @click="saveSettings" style="float: right">存</button>
-    <div>
+    <div class="settings-window-btn">
+      <button @click="showSettings = false" style="float: right">关</button>
+      <button @click="saveSettings" style="float: right">存</button>
+    </div>
+    <div class="settings-window-body">
       <h2>大航海</h2>
       <p>
         身份至低为
@@ -504,7 +526,18 @@ const guardLevelText = computed(() => {
         </div>
         <button @click="addRelationAndSave">新建或保存</button>
       </div>
+
+      <h2>实验功能</h2>
+      <div>
+        <p><b>⚠ 请勿依赖实验功能，实验功能可能在后续版本删除！</b></p>
+        <p>
+          每输出<input size="1" v-model="test_settings.falloff[0]" />次波形强度衰减<input size="1" v-model="test_settings.falloff[1]" />
+          （<span title="为了避免主包被电似，希望主包喜欢">?</span>）
+        </p>
+        <button @click="saveTestSettings">保存实验功能数据</button>
+      </div>
     </div>
+
   </div>
 
   <div class="game-tips">
@@ -514,7 +547,7 @@ const guardLevelText = computed(() => {
   <div class="game-info">
     <h2>主机状态</h2>
 
-    <div style="display: flex">
+    <div class="dashboard" style="display: flex">
       <div class="channel-circle">
         <div class="channel-tag">A</div>
         <div class="channel-strength">{{ channelAStrength }}</div>
