@@ -4,7 +4,7 @@
 import {computed, ref, watch} from "vue"
 import axios from "axios"
 import { Notyf } from 'notyf'
-import { createSocket, destroySocket } from "./socket/index"
+import {createSocket, destroySocket, waveCounter} from "./socket/index"
 import {
   createCoyoteSocket,
   closeCoyoteSocket,
@@ -108,6 +108,10 @@ const showSettings = ref(false)
 // 显示游戏开始警告
 const showWarnWindow = ref(false)
 const warnWindowCountdown = ref(5);
+
+// 测试玩法
+const showTestWindow = ref(false)
+const maxHP = ref(1000)
 
 // 连接状态
 const gameState = ref(false)
@@ -444,7 +448,56 @@ const guardLevelText = computed(() => {
     </div>
     <hr />
     <div style="margin: auto">
-      <b>【注意】</b>请不要在直播过程中展示或使用郊狼主机及配件，直播务必遵守平台规则，否则可能导致账号被封禁！（{{ warnWindowCountdown }}）
+      <b>【注意】</b>请不要在直播过程中展示或使用郊狼主机及配件，直播务必遵守平台规则，否则可能导致账号被封禁！继续即自愿承担可能存在的风险。（{{ warnWindowCountdown }}）
+    </div>
+  </div>
+
+  <div class="settings-window" style="background-color: #0a9a38; font-weight: bold;" v-show="showTestWindow">
+    <div class="settings-window-btn">
+      <button @click="showTestWindow = false" style="float: right">关</button>
+    </div>
+    <div class="settings-window-body">
+      <h2>测试界面</h2>
+      <hr />
+      <p>绿色背景方便用色度键抠像，最大 HP 为 <input v-model="maxHP" size="2" /></p>
+      <p><button @click="waveCounter = 0">重置伤害</button> <button @click="waveCounter++">造成伤害</button></p>
+      <hr />
+      <div class="attack-box" style="padding-top: 25px;">
+        <div style="display: flex;">
+          <div>
+            武器A
+          </div>
+          <div class="attack-a-board">
+            <div class="attack-a-bg" :style="{ width: (channelAStrength / softAStrength) * 100 + '%'}">
+              {{ channelAStrength + "/" + softAStrength }}
+            </div>
+          </div>
+        </div>
+        <br />
+        <div style="display: flex;">
+          <div>
+            武器B
+          </div>
+          <div class="attack-a-board">
+            <div class="attack-a-bg" :style="{ width: (channelBStrength / softBStrength) * 100 + '%'}">
+              {{ channelBStrength + "/" + softBStrength }}
+            </div>
+          </div>
+        </div>
+      </div>
+      <br>
+      <div class="attribute-box">
+        <div style="display: flex;">
+          <div style="margin: auto 0">
+            HP
+          </div>
+          <div class="attribute-hp-board">
+            <div class="attribute-hp-bg" :style="{ width: ((maxHP - channelAStrength*waveCounter) / maxHP) * 100 + '%' }">
+              {{ (maxHP - channelAStrength*waveCounter) + "/" + maxHP }}
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -615,6 +668,7 @@ const guardLevelText = computed(() => {
 
     <h2>调试选项</h2>
     <div class="form">
+      <button @click="showTestWindow = true">测试界面</button>
       <button @click="getAuth">鉴权</button>
       <label>波形数组 <a onclick="window.open('waveHelper.html', '', 'width=500,height=1000,left=700');">波形助手</a></label>
       <input type="text" placeholder="填写欲测试的波形数组" v-model="waveTestData" />
@@ -655,5 +709,34 @@ const guardLevelText = computed(() => {
 }
 .warn-window > * {
   margin: 10px;
+}
+
+.attribute-hp-board {
+  width: 600px;
+  height: 40px;
+  border: #fff 2px solid;
+  margin-left: 16px;
+}
+.attribute-hp-bg {
+  height: 40px;
+  background-color: #ff5151;
+  position: relative;
+  color: #fff;
+  line-height: 40px;
+  text-align: center;
+}
+
+.attack-a-board {
+  width: 200px;
+  height: 20px;
+  border: #fff 2px solid;
+  margin-left: 16px;
+}
+.attack-a-bg {
+  height: 20px;
+  background-color: #fff;
+  position: relative;
+  color: #000;
+  text-align: center;
 }
 </style>

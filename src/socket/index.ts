@@ -39,7 +39,7 @@ if (window.localStorage.getItem("test")) {
     console.log(testSettings.value)
 }
 
-let waveCounter = testSettings.value.falloff[0]
+let waveCounter = ref(0)
 
 /**
  * 转换大航海等级
@@ -107,11 +107,9 @@ function createSocket(authBody: string, wssLinks: string[]) {
                     try {
                         sendWaveData(5 * res.data.gift_num, 5 * res.data.gift_num, settings.value.waveData[res.data.gift_id], settings.value.waveData[res.data.gift_id])
                         notyf.success("收到礼物" + res.data.gift_name + "*"+res.data.gift_num)
-                        waveCounter--
-                        console.log(waveCounter)
-                        if (waveCounter == 0 && testSettings.value.falloff[0] > 0) {
+                        waveCounter.value++
+                        if (waveCounter.value % testSettings.value.falloff[0] == 0 && testSettings.value.falloff[0] > 0) {
                             notyf.success("触发强度衰减")
-                            waveCounter = testSettings.value.falloff[0]
                             addOrIncrease(1, 1, testSettings.value.falloff[1])
                             addOrIncrease(1, 2, testSettings.value.falloff[1])
                         }
@@ -188,4 +186,4 @@ function getWsClient() {
     return ws
 }
 
-export { createSocket, destroySocket, getWebSocketConfig, getWsClient }
+export { createSocket, destroySocket, getWebSocketConfig, getWsClient, waveCounter }
