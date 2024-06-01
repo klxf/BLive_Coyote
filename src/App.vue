@@ -112,6 +112,7 @@ const warnWindowCountdown = ref(5);
 // 测试玩法
 const showTestWindow = ref(false)
 const maxHP = ref(1000)
+const HP = ref(maxHP.value)
 
 // 连接状态
 const gameState = ref(false)
@@ -157,6 +158,10 @@ watch(showWarnWindow, (newVal) => {
   } else {
     warnWindowCountdown.value = 5; // 重置倒计时
   }
+});
+
+watch(waveCounter, () => {
+  HP.value = Math.max(0, HP.value - channelAStrength.value)
 });
 
 const fansMedal = computed({
@@ -460,7 +465,7 @@ const guardLevelText = computed(() => {
       <h2>测试界面</h2>
       <hr />
       <p>绿色背景方便用色度键抠像，最大 HP 为 <input v-model="maxHP" size="2" /></p>
-      <p><button @click="waveCounter = 0">重置伤害</button> <button @click="waveCounter++">造成伤害</button></p>
+      <p><button @click="HP = maxHP">重置伤害</button> <button @click="HP -= 10">造成伤害</button></p>
       <hr />
       <div class="attack-box" style="padding-top: 25px;">
         <div style="display: flex;">
@@ -492,8 +497,8 @@ const guardLevelText = computed(() => {
             HP
           </div>
           <div class="attribute-hp-board">
-            <div class="attribute-hp-bg" :style="{ width: ((maxHP - channelAStrength*waveCounter) / maxHP) * 100 + '%' }">
-              {{ (maxHP - channelAStrength*waveCounter) + "/" + maxHP }}
+            <div class="attribute-hp-bg" :style="{ width: (HP / maxHP) * 100 + '%' }">
+              {{ HP + "/" + maxHP }}
             </div>
           </div>
         </div>
