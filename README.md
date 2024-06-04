@@ -12,8 +12,6 @@
 
 本项目以 [Bilibili 直播&互玩 JavaScript Demo](https://open-live.bilibili.com/document/a7bd5377-ad7d-a273-25ae-28caf37a7a85) 和 [DG-LAB SOCKET控制-控制端开源](https://github.com/DG-LAB-OPENSOURCE/DG-LAB-OPENSOURCE/tree/main/socket) 为基础，实现了直播间送礼物控制郊狼主机输出的功能。
 
-演示视频：[郊狼直播互动玩法正式发布【BLive Coyote】](https://www.bilibili.com/video/BV1D1421i7WB/)
-
 - 郊狼 WebSocket 后端请参考：[DG-LAB-OPENSOURCE](https://github.com/DG-LAB-OPENSOURCE/DG-LAB-OPENSOURCE/tree/main/socket/BackEnd(Node))
 - 哔哩哔哩直播互动玩法服务端请参考：[JavaScript Demo](https://open-live.bilibili.com/document/a7bd5377-ad7d-a273-25ae-28caf37a7a85)
 
